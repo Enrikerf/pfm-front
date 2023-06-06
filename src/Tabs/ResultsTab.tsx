@@ -3,9 +3,8 @@ import {useEffect, useState} from "react";
 import {useLocation, useParams} from "react-router-dom";
 import GenericTable from "../Components/MyTable/GenericTable";
 import {TableRowData} from "../Components/MyTable/TableRowData";
-import {ResultServiceClient} from "../protobuf/generated/result_grpc_web_pb";
+import {ResultServiceClient} from "../protobuf/gen/result_grpc_web_pb";
 import {TableData} from "../Components/MyTable/TableData";
-import messages from "../protobuf/generated/batch_pb";
 
 export default function ResultsTab() {
     let location = useLocation();
@@ -13,7 +12,7 @@ export default function ResultsTab() {
     const [lastId, setLastId] = useState(0)
     const [rows, setRows] = useState([] as TableRowData[])
     useEffect(() => {
-        const messages = require('../protobuf/generated/result_pb');
+        const messages = require('../protobuf/gen/result_grpc_web_pb');
         let listTaskRequest = new messages.ListResultRequest()
         let google_protobuf_wrappers_pb = require('google-protobuf/google/protobuf/wrappers_pb.js');
         if (uuid) {
@@ -24,7 +23,7 @@ export default function ResultsTab() {
         }
         let metadata = {};
         let taskService = new ResultServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
-        taskService.listResult(listTaskRequest, metadata, function (err, response) {
+        taskService.getBatchResults(listTaskRequest, metadata, function (err, response) {
             if (err) {
                 console.log(err);
             } else {

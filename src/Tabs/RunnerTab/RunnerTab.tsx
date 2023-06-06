@@ -5,7 +5,6 @@ import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XA
 import "./RunnerTab.scss"
 import Button from "@mui/material/Button";
 import {TaskService} from "../../Services/TaskService";
-import {BatchService} from "../../Services/BatchService";
 import {ResultService} from "../../Services/ResultService";
 
 interface GraphPoint {
@@ -21,12 +20,11 @@ export default function RunnerTab() {
     const [yMax, setYMax] = useState(0)
     const [yMin, setYMin] = useState(0)
     const taskService = new TaskService()
-    const batchService = new BatchService()
     const resultService = new ResultService()
 
     async function newRun() {
         if (uuid !== undefined) {
-            let newBatchUuid = await batchService.create(uuid)
+            let newBatchUuid = await resultService.communicateTaskManually(uuid)
             setBatchUuid(newBatchUuid)
             let stream = resultService.getStream(newBatchUuid)
             let newYmax: number = 0

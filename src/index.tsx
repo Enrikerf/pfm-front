@@ -9,7 +9,6 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import TasksTab from "./Tabs/TasksTab/TasksTab";
-import StepsTab from "./Tabs/StepsTab";
 import BatchesList from "./Tabs/BatchesTab/BatchesList";
 import ResultsTab from "./Tabs/ResultsTab";
 import RunnerTab from "./Tabs/RunnerTab/RunnerTab";
@@ -23,7 +22,7 @@ ReactDOM.render(
             <Routes>
                 <Route path="/" element={<App/>}>
                     <Route index element={<TasksTab/>}/>
-                    <Route path=":uuid/steps" element={<StepsTab/>}/>
+                    {/*<Route path=":uuid/steps" element={<StepsTab/>}/>*/}
                     <Route path=":uuid/batches" element={<BatchesTab/>}>
                         <Route index element={<BatchesList/>}/>
                         <Route path=":uuid/results" element={<ResultsTab/>}/>

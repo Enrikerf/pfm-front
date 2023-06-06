@@ -9,7 +9,8 @@ help: ## Outputs this help screen
 
 ## —— Proto —————————————————————————————————————————
 protoGen: ## @proto Start all or <container_name> containers in foreground
-	protoc 	app/Adapter/In/ApiGrcp/proto/*.proto --go_out=app/Adapter/In/ApiGrcp/gen --go-grpc_out=app/Adapter/In/ApiGrcp/gen
+    protoc --proto_path=src/protobuf --js_out=import_style=commonjs,binary:src/protobuf/gen --grpc-web_out=import_style=commonjs,mode=grpcwebtext:./src/protobuf/gen src/protobuf/*.proto
+# 	protoc 	src/protobuf/*.proto --go_out=src/protobuf/gen --go-grpc_out=src/protobuf/gen
 
 ## —— 🐋 Git 🐋 —————————————————————————————————————————
 clearGit:

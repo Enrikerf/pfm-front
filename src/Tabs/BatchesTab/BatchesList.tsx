@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {BatchServiceClient} from "../../protobuf/generated/batch_grpc_web_pb";
+import {ResultServiceClient} from "../../protobuf/gen/result_grpc_web_pb";
 import GenericTable from "../../Components/MyTable/GenericTable";
 import {TableRowData} from "../../Components/MyTable/TableRowData";
 import {TableData} from "../../Components/MyTable/TableData";
@@ -14,7 +14,7 @@ export default function BatchesList() {
     const [lastId, setLastId] = useState(0)
     const [rows, setRows] = useState([] as TableRowData[])
     useEffect(() => {
-        const messages = require('../../protobuf/generated/batch_pb');
+        const messages = require('../../protobuf/gen/result_pb');
         let google_protobuf_wrappers_pb = require('google-protobuf/google/protobuf/wrappers_pb.js');
         let listTaskRequest = new messages.ListBatchesRequest()
         if (uuid) {
@@ -24,8 +24,8 @@ export default function BatchesList() {
             listTaskRequest.setFilters(filters)
         }
         let metadata = {};
-        let taskService = new BatchServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
-        taskService.listBatches(listTaskRequest, metadata, function (err, response) {
+        let taskService = new ResultServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
+        taskService.getTaskBatches(listTaskRequest, metadata, function (err, response) {
             if (err) {
                 console.log(err);
             } else {
