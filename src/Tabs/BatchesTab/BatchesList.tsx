@@ -1,65 +1,51 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {ResultServiceClient} from "../../protobuf/gen/result_grpc_web_pb";
 import GenericTable from "../../Components/MyTable/GenericTable";
 import {TableRowData} from "../../Components/MyTable/TableRowData";
 import {TableData} from "../../Components/MyTable/TableData";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
-
+import {useNavigate, useParams} from "react-router-dom";
+import {ResultService} from "../../Services/ResultService";
 
 export default function BatchesList() {
+
     let navigate = useNavigate();
     let {uuid} = useParams()
-    let location = useLocation()
-    const [lastId, setLastId] = useState(0)
     const [rows, setRows] = useState([] as TableRowData[])
-    useEffect(() => {
-        const messages = require('../../protobuf/gen/result_pb');
-        let google_protobuf_wrappers_pb = require('google-protobuf/google/protobuf/wrappers_pb.js');
-        let listTaskRequest = new messages.ListBatchesRequest()
+    const fetchData = async (uuid :string) => {
+        const resultService = new ResultService()
         if (uuid) {
-            let x = new google_protobuf_wrappers_pb.StringValue([uuid])
-            let filters = new messages.Filters()
-            filters.setTaskUuid(x)
-            listTaskRequest.setFilters(filters)
-        }
-        let metadata = {};
-        let taskService = new ResultServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
-        taskService.getTaskBatches(listTaskRequest, metadata, function (err, response) {
-            if (err) {
-                console.log(err);
-            } else {
-                let protoTasks = response.getBatchesList()
-                let newRows: TableRowData[] = []
-                for (let i = 0; i < protoTasks.length; i++) {
-                    newRows.push({
-                        id: i + 1,
-                        values: [
-                            {name: "uuid", value: protoTasks[i].getUuid()},
-                            {name: "task_uuid", value: protoTasks[i].getTaskUuid()},
-                            {name: "results", value: "icon"},
-                            {name: "created_at", value: protoTasks[i].getCreatedAt()},
-                            {name: "updated_at", value: protoTasks[i].getUpdatedAt()},
-                        ]
-                    })
-                }
-                setLastId(protoTasks.length)
-                setRows(newRows)
+            const protoBatches = await resultService.getTaskBatches(uuid)
+            console.log(protoBatches)
+            let newRows: TableRowData[] = []
+            for (let i = 0; i < protoBatches.length; i++) {
+                newRows.push({
+                    id: i + 1,
+                    key: protoBatches[i].getUuid(),
+                    values: [
+                        {key: 1, name: "created_at", value: protoBatches[i].getCreatedAt()},
+                        {key: 2, name: "results", value: "icon"},
+                        {key: 2, name: "graphs", value: "icon"},
+                        {key: 3, name: "", value: ""},
+                    ]
+                })
             }
-        })
-        return () => {
-        };
+            setRows(newRows)
+        }
+    }
+    useEffect(() => {
+        if(uuid){
+            fetchData(uuid).catch(console.error)
+        }
     }, [uuid])
-
 
     async function handleGoTo(event: React.MouseEvent<unknown>, id: number, toGo: TableData) {
         if (toGo.value === "icon") {
-            let newUuid = rows.find(row => row.id === id)?.values.find(value => value.name === "uuid")
+            let newUuid = rows.find(row => row.id === id)?.key
             if (newUuid) {
                 if (uuid) {
-                    navigate(newUuid.value + "/" + toGo.name, {});
+                    navigate(newUuid + "/" + toGo.name, {});
                 } else {
-                    navigate(newUuid.value + "/" + toGo.name, {});
+                    navigate(newUuid + "/" + toGo.name, {});
                 }
             }
         } else {

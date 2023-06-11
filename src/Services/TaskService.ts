@@ -1,5 +1,4 @@
 import {TaskServiceClient} from "../protobuf/gen/task_grpc_web_pb";
-import {TableRowData} from "../Components/MyTable/TableRowData";
 
 const taskMessages = require('../protobuf/gen/task_pb')
 const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
@@ -15,10 +14,9 @@ export class TaskService {
     }
 
     list(): Promise<proto.task.Task[]> {
-        let ListRequest = new taskMessages.ListTasksRequest()
+        let request = new taskMessages.ListTasksRequest()
         return new Promise((resolve, reject) => {
-            this.client.listTasks(ListRequest, {}, function (err, response) {
-                console.log(ListRequest)
+            this.client.listTasks(request, {}, function (err, response) {
                 if (err) {
                     console.log(err);
                     reject(err)
@@ -30,25 +28,46 @@ export class TaskService {
         })
     }
 
+    update(taskId: string): Promise<any> {
+        let request = new taskMessages.UpdateTaskRequest()
+        let editableTaskParams = new taskMessages.EditableTaskParams()
+        editableTaskParams.setStatus(1)
+        request.setTaskUuid(taskId)
+        request.setParams(editableTaskParams)
+        console.log(request)
+        return new Promise((resolve, reject) => {
+            this.client.updateTask(request, {}, function (err, response) {
+                if (err) {
+                    console.log(err);
+                    reject(err)
+                } else {
+                    console.log("ok")
+                    console.log(response)
+                    resolve(response)
+                }
+            })
+        })
+    }
 
-    stop(uuid: string) {
-        if (regexExp.test(uuid)) {
-            let updateTaskRequest = new taskMessages.UpdateTaskRequest()
-            let updateTaskParams = new taskMessages.EditableTaskParams()
-            updateTaskRequest.setTaskUuid(uuid)
-            updateTaskParams.setStatus(3)
-            updateTaskRequest.setParams(updateTaskParams)
+
+    stop(uuid: string): Promise<any> {
+        console.log("valid uuid to stop> " + uuid)
+        let updateTaskRequest = new taskMessages.UpdateTaskRequest()
+        let updateTaskParams = new taskMessages.EditableTaskParams()
+        updateTaskRequest.setTaskUuid(uuid)
+        updateTaskParams.setStatus(3)
+        updateTaskRequest.setParams(updateTaskParams)
+        return new Promise((resolve, reject) => {
             this.client.updateTask(updateTaskRequest, {}, function (err, response) {
                 if (err) {
                     console.log(err);
+                    reject(err)
                 } else {
                     console.log("stopped: " + uuid)
+                    resolve(response)
                 }
             })
-        } else {
-            console.log("invalid uuid to stop")
-        }
-
+        })
     }
 
 }

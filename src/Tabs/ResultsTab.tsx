@@ -1,53 +1,40 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {useLocation, useParams} from "react-router-dom";
+import { useNavigate, useParams} from "react-router-dom";
 import GenericTable from "../Components/MyTable/GenericTable";
 import {TableRowData} from "../Components/MyTable/TableRowData";
-import {ResultServiceClient} from "../protobuf/gen/result_grpc_web_pb";
 import {TableData} from "../Components/MyTable/TableData";
+import {ResultService} from "../Services/ResultService";
 
 export default function ResultsTab() {
-    let location = useLocation();
+    let navigate = useNavigate();
     let {uuid} = useParams()
-    const [lastId, setLastId] = useState(0)
     const [rows, setRows] = useState([] as TableRowData[])
-    useEffect(() => {
-        const messages = require('../protobuf/gen/result_grpc_web_pb');
-        let listTaskRequest = new messages.ListResultRequest()
-        let google_protobuf_wrappers_pb = require('google-protobuf/google/protobuf/wrappers_pb.js');
+    const fetchData = async (uuid :string) => {
+        const resultService = new ResultService()
         if (uuid) {
-            let uuidStringValue = new google_protobuf_wrappers_pb.StringValue([uuid])
-            let filters = new messages.Filters()
-            filters.setBatchUuid(uuidStringValue)
-            listTaskRequest.setFilters(filters)
-        }
-        let metadata = {};
-        let taskService = new ResultServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
-        taskService.getBatchResults(listTaskRequest, metadata, function (err, response) {
-            if (err) {
-                console.log(err);
-            } else {
-                let protoResults = response.getResultsList()
-                let newRows: TableRowData[] = []
-                for (let i = 0; i < protoResults.length; i++) {
-                    newRows.push({
-                        id: i + 1,
-                        values: [
-                            {name: "uuid", value: protoResults[i].getUuid()},
-                            {name: "content", value: protoResults[i].getContent()},
-                            {name: "batch_uuid", value: protoResults[i].getBatchUuid()},
-                            {name: "created_at", value: protoResults[i].getCreatedAt()},
-                            {name: "updated_at", value: protoResults[i].getUpdatedAt()},
-                        ]
-                    })
-                }
-                setLastId(protoResults.length)
-                setRows(newRows)
+            const protoResults = await resultService.getResults(uuid)
+            console.log(protoResults)
+            let newRows: TableRowData[] = []
+            for (let i = 0; i < protoResults.length; i++) {
+                newRows.push({
+                    id: i + 1,
+                    key: protoResults[i].getUuid(),
+                    values: [
+                        {key: 1, name: "created_at", value: protoResults[i].getCreatedAt()},
+                        {key: 2, name: "content",  value: protoResults[i].getContent()},
+                        {key: 3, name: "", value: ""},
+                    ]
+                })
             }
-        })
-        return () => {
-        };
-    }, [])
+            setRows(newRows)
+        }
+    }
+    useEffect(() => {
+        if(uuid){
+            fetchData(uuid).catch(console.error)
+        }
+    }, [uuid])
 
     async function handleGoTo(event: React.MouseEvent<unknown>, id: number, toGo: TableData) {
     }

@@ -147,11 +147,10 @@ export default function GenericTable(props: {
                                                 role="checkbox"
                                                 aria-checked={isItemSelected}
                                                 tabIndex={-1}
-                                                key={labelId}
+                                                key={row.key}
                                                 selected={isItemSelected}
-
                                             >
-                                                <TableCell padding="checkbox">
+                                                <TableCell padding="checkbox" key={"checkbox"}>
                                                     <Checkbox
                                                         onClick={(event) => handleClick(event, row.id)}
                                                         color="primary"
@@ -166,10 +165,11 @@ export default function GenericTable(props: {
                                                         if (value.value === "icon") {
                                                             return (
                                                                 <GenericTableCellIcon
+                                                                    align={i === 0 ? "left" : "right"}
                                                                     id={row.id}
+                                                                    key={value.key}
                                                                     tableData={value}
                                                                     handleGoTo={props.handleGoTo}
-                                                                    align={i === 0 ? "left" : "right"}
                                                                 />
                                                             )
                                                         } else {
@@ -177,6 +177,7 @@ export default function GenericTable(props: {
                                                                 <GenericTableCell
                                                                     align={i === 0 ? "left" : "right"}
                                                                     id={row.id}
+                                                                    key={value.key}
                                                                     tableData={value}
                                                                     handleGoTo={props.handleGoTo}
                                                                 />

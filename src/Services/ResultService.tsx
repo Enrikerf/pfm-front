@@ -1,6 +1,5 @@
 import {ResultServiceClient} from "../protobuf/gen/result_grpc_web_pb";
 const resultMessages = require('../protobuf/gen/result_pb')
-const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 
 export class ResultService {
     client: ResultServiceClient
@@ -8,7 +7,7 @@ export class ResultService {
     newUuid: string
 
     constructor() {
-        this.client = new ResultServiceClient("http://2ab0-77-225-241-204.ngrok.io", null, null)
+        this.client = new ResultServiceClient(process.env.BACKEND_URL ?? "http://localhost:8080", null, null)
         this.messages = resultMessages
         this.newUuid = ""
     }
@@ -24,6 +23,38 @@ export class ResultService {
                 } else {
                     let batchUuid = response.getBatchUuid()
                     resolve(batchUuid)
+                }
+            })
+        })
+    }
+
+    getTaskBatches(taskId: string): Promise<proto.result.Batch[]> {
+        let request = new resultMessages.GetTaskBatchesRequest()
+        request.setTaskUuid(taskId)
+        return new Promise((resolve, reject) => {
+            this.client.getTaskBatches(request, {}, function (err, response) {
+                if (err) {
+                    console.log(err);
+                    reject(err)
+                } else {
+                    let proto = response.getBatchesList()
+                    resolve(proto)
+                }
+            })
+        })
+    }
+
+    getResults(batchId: string): Promise<proto.result.Result[]> {
+        let request = new resultMessages.GetBatchResultsRequest()
+        request.setBatchUuid(batchId)
+        return new Promise((resolve, reject) => {
+            this.client.getBatchResults(request, {}, function (err, response) {
+                if (err) {
+                    console.log(err);
+                    reject(err)
+                } else {
+                    let proto = response.getResultsList()
+                    resolve(proto)
                 }
             })
         })

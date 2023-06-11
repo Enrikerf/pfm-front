@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 import {useParams} from "react-router-dom";
 import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import "./RunnerTab.scss"
+import "./GraphTab.scss"
 import Button from "@mui/material/Button";
 import {TaskService} from "../../Services/TaskService";
 import {ResultService} from "../../Services/ResultService";
@@ -12,26 +12,21 @@ interface GraphPoint {
     point: number
 }
 
-export default function RunnerTab() {
+export default function GraphTab() {
 
     let {uuid} = useParams()
-    const [batchUuid, setBatchUuid] = useState("")
     const [rows, setRows] = useState([] as GraphPoint[])
     const [errors, setErrors] = useState([] as string[])
-    const [yMax, setYMax] = useState(0)
+    const [yMax, setYMax] = useState(12)
     const [yMin, setYMin] = useState(0)
-    const taskService = new TaskService()
     const resultService = new ResultService()
 
     async function newRun() {
         if (uuid !== undefined) {
-            console.log("communicating: " + uuid)
-            let newBatchUuid = await resultService.communicateTaskManually(uuid)
-            setBatchUuid(newBatchUuid)
-            console.log("starting stream: " + newBatchUuid)
-            let stream = resultService.getStream(newBatchUuid)
+            console.log("starting stream: " + uuid)
+            let stream = resultService.getStream(uuid)
             let newYmax: number = 0
-            let newYmin: number = 0
+            let newYmin: number = 10
             let newRows: GraphPoint[] = []
             let newErrors: string[] = []
             let slice: GraphPoint[]
@@ -57,7 +52,7 @@ export default function RunnerTab() {
 
                 }
                 if (newYmax > yMax) {
-                    setYMax(newYmax)
+                    // setYMax(newYmax)
                 }
                 if (newYmin > yMin) {
                     setYMin(newYmin)
@@ -91,13 +86,6 @@ export default function RunnerTab() {
         setYMin(0)
     }
 
-    async function stop() {
-        if (uuid !== undefined) {
-            await taskService.stop(uuid)
-        } else {
-            console.log("cant stop")
-        }
-    }
 
     return (
         <div className="runner-container">
@@ -110,13 +98,6 @@ export default function RunnerTab() {
                     onClick={newRun}
                 >Run</Button>
                 <Button
-                    color={"error"}
-                    size={"large"}
-                    variant={"contained"}
-                    className="runner-button-container-button"
-                    onClick={stop}
-                >Stop</Button>
-                <Button
                     color={"warning"}
                     size={"large"}
                     variant={"contained"}
@@ -124,8 +105,7 @@ export default function RunnerTab() {
                     onClick={clear}
                 >Clear</Button>
             </div>
-            <h3>task: {uuid}</h3>
-            <h3>batch: {batchUuid}</h3>
+            <h3>batch: {uuid}</h3>
             <div className={"runner-dashboard"}>
                 <div className={"runner-dashboard-graph-container"}>
                     <ResponsiveContainer width='60%' minWidth={"60rem"} aspect={3.0}>

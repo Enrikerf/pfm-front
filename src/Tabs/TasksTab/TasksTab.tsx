@@ -18,22 +18,26 @@ export default function TasksTab() {
         for (let i = 0; i < protoTasks.length; i++) {
             newRows.push({
                 id: i + 1,
+                key: protoTasks[i].getUuid(),
                 values: [
-                    {name: "runner", value: "icon"},
-                    {name: "uuid", value: protoTasks[i].getUuid()},
-                    {name: "host", value: protoTasks[i].getHost()},
-                    {name: "port", value: protoTasks[i].getPort()},
-                    {name: "mode", value: protoTasks[i].getMode()},
-                    {name: "status", value: protoTasks[i].getStatus()},
-                    {name: "executionMode", value: protoTasks[i].getExecutionmode()},
-                    {name: "batches", value: "icon"},
-                    {name: "steps", value: "icon"},
-                    {name: "createdAt", value: ""},
-                    {name: "updatedAt", value: ""},
+                    {key: 1, name: "host:port", value: protoTasks[i].getHost() + ':' + protoTasks[i].getPort()},
+                    {key: 2, name: "mode", value: protoTasks[i].getMode()},
+                    {key: 3, name: "status", value: protoTasks[i].getStatus()},
+                    {key: 4, name: "executionMode", value: protoTasks[i].getExecutionmode()},
+                    {key: 5, name: "steps", value: protoTasks[i].getCommandsList()},
+                    {key: 6, name: "batches", value: "icon"},
+                    {key: 7, name: "runner", value: "icon"},
+                    {key: 8, name: "", value: ""},
                 ]
             })
         }
         setRows(newRows)
+        console.log(rows)
+    }
+    const updateStatus = async (taskUuid: string) => {
+        await taskService.update(taskUuid)
+        console.log("updated?")
+        fetchData().catch(console.error)
     }
     useEffect(() => {
         fetchData().catch(console.error)
@@ -41,9 +45,19 @@ export default function TasksTab() {
 
 
     async function handleGoTo(event: React.MouseEvent<unknown>, id: number, toGo: TableData) {
-        let uuid = rows.find(row => row.id === id)?.values.find(value => value.name === "uuid")
-        if (uuid) {
-            navigate(uuid.value + "/" + toGo.name, {});
+        let row = rows.find(row => row.id === id)
+        if (row) {
+            if (toGo.name === "runner") {
+                let x = row.values.find(value => value.name === "executionMode")
+                if (x?.value === "AUTOMATIC") {
+                    await updateStatus(row.key).catch(console.error)
+                    console.log("status updated")
+                } else {
+                    navigate(row.key + "/" + toGo.name, {});
+                }
+            } else {
+                navigate(row.key + "/" + toGo.name, {});
+            }
         }
     }
 
